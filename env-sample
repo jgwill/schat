@@ -1,9 +1,16 @@
-GEMINI_API_KEY="GEMINI_API_KEY"
-VITE_GOOGLE_API_KEY="GEMINI_API_KEY"
-API_KEY="GEMINI_API_KEY"
-GOOGLE_API_KEY="GEMINI_API_KEY"
-#Yah, AI Studio uses one, v0 another, the local server another... bahhhh
+# Recommended: Primary API key for Mia's Gem Chat Studio
+MIAGEM_API_KEY="your_actual_gemini_api_key_here"
 
+# Legacy fallback (will show warning if used)
+API_KEY="your_actual_gemini_api_key_here"
+
+# Alternative naming conventions (for compatibility with various tools)
+GEMINI_API_KEY="your_actual_gemini_api_key_here"
+VITE_GOOGLE_API_KEY="your_actual_gemini_api_key_here"
+GOOGLE_API_KEY="your_actual_gemini_api_key_here"
+
+#Note: The application prioritizes MIAGEM_API_KEY, then API_KEY as fallback
+#Other names are mapped for broader compatibility but MIAGEM_API_KEY is preferred
 
 
 
