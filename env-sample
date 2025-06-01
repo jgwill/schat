@@ -6,3 +6,20 @@ GOOGLE_API_KEY="GEMINI_API_KEY"
 
 
 
+
+
+LANGFUSE_SECRET_KEY="__PRIVATE_KEY__"
+LANGFUSE_PUBLIC_KEY="__PUBLIC_KEY__"
+LANGFUSE_HOST="https://cloud.langfuse.com"
+LANGFUSE_PROJECT_ID="__PROJECT_ID__"
+
+LANGFUSE_AUTH3="Basic ____ENCODED_64__string"
+
+TRACING_URL="https://cloud.langfuse.com/project/__PROJECT_ID__/traces"
+
+GIST_ID="__GIST_ID"
+
+
+
+
+
