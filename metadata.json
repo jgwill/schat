@@ -1,0 +1,9 @@
+{
+  "name": "MiaGemChatStudio",
+  "description": "Mia's Gem Chat Studio: A multimodal chat application powered by the Gemini API, featuring Mia, your AI assistant. Interact via text and voice, manage personas, and save chat sessions.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "prompt": ""
+}

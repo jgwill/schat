@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mia's Gem Chat Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Note: Using Tailwind CSS via CDN is suitable for development and demos.
+        // For production, it's recommended to install Tailwind CSS as a PostCSS plugin
+        // or use the Tailwind CLI for optimized builds. https://tailwindcss.com/docs/installation
+        tailwind.config = {
+            darkMode: 'class', // or 'media' if you prefer OS setting
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-primary': '#1E40AF', // Example: A deep blue
+                        'brand-secondary': '#3B82F6', // Example: A lighter blue
+                        'gpt-dark': '#202123',
+                        'gpt-light': '#343541',
+                        'gpt-gray': '#444654',
+                        'gpt-text': '#D1D5DB', // Lighter gray for text
+                        'user-bubble': '#3B82F6', // Blue for user messages
+                        'ai-bubble': '#4B5563',   // Darker gray for AI messages
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    // Add prose styles for MarkdownRenderer
+                    typography: (theme) => ({
+                        DEFAULT: {
+                            css: {
+                                color: theme('colors.gpt-text'),
+                                a: {
+                                    color: theme('colors.brand-secondary'),
+                                    '&:hover': {
+                                        color: theme('colors.brand-primary'),
+                                    },
+                                },
+                                strong: {
+                                   color: theme('colors.white'),
+                                },
+                                code: {
+                                    color: theme('colors.pink.400'),
+                                    backgroundColor: theme('colors.gpt-gray'),
+                                    padding: '0.2em 0.4em',
+                                    borderRadius: '0.25rem',
+                                },
+                                pre: {
+                                    color: theme('colors.gray.200'),
+                                    backgroundColor: theme('colors.gpt-gray'),
+                                    padding: theme('spacing.4'),
+                                    borderRadius: theme('borderRadius.md'),
+                                    overflowX: 'auto',
+                                },
+                                'code::before': { content: 'none' },
+                                'code::after': { content: 'none' },
+                                ul: { listStyleType: 'disc', paddingLeft: '1.5em'},
+                                ol: { listStyleType: 'decimal', paddingLeft: '1.5em'},
+                                li: { marginTop: '0.25em', marginBottom: '0.25em'},
+                            },
+                        },
+                    }),
+                }
+            },
+            plugins: [
+                // require('@tailwindcss/typography'), // Removed: 'require' is not defined in the browser.
+                                                    // Typography plugin via CDN needs a different setup if not default.
+            ],
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.0.1"
+  }
+}
+</script>
+</head>
+<body class="bg-gpt-dark text-gpt-text font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      // Initialize Mermaid after the page loads and React has rendered
+      // Check if mermaid is available (loaded from CDN)
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({ 
+            startOnLoad: true, // Automatically render diagrams with class="mermaid"
+            theme: 'dark', // Or 'default', 'forest', 'neutral'
+            // For dark theme, you might need to specify themeVariables for better contrast
+            themeVariables: {
+                primaryColor: '#3B82F6', // brand-secondary
+                primaryTextColor: '#FFFFFF',
+                primaryBorderColor: '#4B5563', // ai-bubble
+                lineColor: '#D1D5DB', // gpt-text
+                textColor: '#D1D5DB', // gpt-text
+                mainBkg: '#343541', // gpt-light
+                nodeBorder: '#3B82F6',
+            }
+        });
+         // If you need to re-render after dynamic content changes (not typical with startOnLoad:true)
+        // mermaid.run();
+      } else {
+        console.warn("Mermaid library not found. Diagrams will not be rendered.");
+      }
+    </script>
+</body>
+</html><link rel="stylesheet" href="index.css">
+<script src="index.tsx" type="module"></script>
