@@ -179,6 +179,18 @@ This API provides a way to interact with the application's core logic without di
 
 -   React 18+, TypeScript, Tailwind CSS, @google/genai, Browser Speech APIs, MediaRecorder API, Browser Camera APIs, FileReader API, Mermaid.js.
 
+## Using as a Component Library
+
+The components, hooks, and services can be compiled into a small library for reuse.
+
+1. Run `npm run build:lib` to generate the `dist/` folder.
+2. Install this package in another project and import what you need:
+
+```ts
+import { ChatWindow, ChatInput } from 'miagemchatstudio';
+```
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

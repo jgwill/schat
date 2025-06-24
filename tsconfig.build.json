@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": [
+    "components/**/*",
+    "hooks/**/*",
+    "services/**/*",
+    "constants.ts",
+    "personas.ts",
+    "types.ts",
+    "index.ts"
+  ],
+  "exclude": [
+    "index.tsx",
+    "App.tsx",
+    "book/**"
+  ]
+}
