@@ -9,3 +9,11 @@
 
 ## 49a8723 chore: adjust build config
 - Tweaked the build config to silence TypeScript complaints for now.
+
+## b864752 apply previous commit
+Added missing files after previous code generation.
+
+## cd37db9 feat: provide example usage and passing build
+- Installed dependencies and fixed TypeScript build errors.
+- Introduced an example Vite app under `examples/basic-usage` demonstrating how to consume the library.
+- Expanded README with step-by-step instructions to run the example.

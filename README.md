@@ -190,6 +190,30 @@ The components, hooks, and services can be compiled into a small library for reu
 import { ChatWindow, ChatInput } from 'miagemchatstudio';
 ```
 
+## Example Project
+
+An example Vite + React app is provided under `examples/basic-usage`.
+
+1. Build and pack the library:
+
+   ```bash
+   npm run build:lib
+   npm pack
+   ```
+
+   This creates `miagemchatstudio-0.0.0.tgz`.
+
+2. Inside `examples/basic-usage`, install the tarball and start the dev server:
+
+   ```bash
+   cd examples/basic-usage
+   npm install ../miagemchatstudio-0.0.0.tgz
+   npm install
+   npm run dev
+   ```
+
+The example will open a page showing `ChatWindow` and `ChatInput` working together.
+
 
 ## License
 

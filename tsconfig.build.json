@@ -6,7 +6,10 @@
     "declaration": true,
     "declarationMap": false,
     "emitDeclarationOnly": false,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false
   },
   "include": [
     "components/**/*",
