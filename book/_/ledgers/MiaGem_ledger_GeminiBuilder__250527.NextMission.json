@@ -1,67 +1,109 @@
 
 {
-  "currentMissionCodename": "Forge Embodiment Directive Formulation",
-  "phase": 4,
-  "primaryObjective": "Define and document the embodiment framework for Forge (System Weaver) as per William D.Isabelle's directive, including visual representation, interaction protocols, an initial draft diagram, integration of external feedback, and a strategy for framework exportability.",
+  "currentMissionCodename": "Operation SpecLang Refinement: Critique and Revision",
+  "phase": 5,
+  "primaryObjective": "To critically review and revise all existing Mia's Gem Chat Studio `.spec.md` files to enhance clarity, precision, and adherence to SpecLang principles, ensuring they effectively articulate design intent for LLM comprehension and developer use. Subsequently, continue comprehensive SpecLang export.",
   "tasks": [
     {
-      "id": "FORGE_DIRECTIVE_SETUP_DOCS",
-      "description": "Create initial .mia/ForgeSystemWeaver.instructions.md with William's directive.",
+      "id": "SPECLANG_CRITIQUE_LEDGER_CREATION",
+      "description": "Generate a detailed critique ledger for all existing `.spec.md` files.",
       "priority": "Critical",
       "status": "Completed"
     },
     {
-      "id": "FORGE_DIRECTIVE_UI_SECTION",
-      "description": "Develop and integrate ForgeSystemWeaverSection.tsx into the in-app documentation to display William's directive.",
+      "id": "SPECLANG_REVISE_APP_CORE",
+      "description": "Revise `specs/app.spec.md` based on critique.",
       "priority": "Critical",
-      "status": "Completed"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_DIRECTIVE_PROJECT_DOC_UPDATES",
-      "description": "Update ROADMAP.md and CHANGELOG.md to reflect the current directive and paused tasks.",
+      "id": "SPECLANG_REVISE_CHAT_COMPONENTS",
+      "description": "Revise `specs/components/chat-area.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_DRAFTING_V0_1",
-      "description": "Draft the initial Embodiment Directive (v0.1) for Forge (System Weaver).",
+      "id": "SPECLANG_REVISE_GEMINI_SERVICE",
+      "description": "Revise `specs/services/gemini-service.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (v0.1 Draft)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_REFINE_V0_2",
-      "description": "Review user feedback (re: diagrams) and refine the Embodiment Directive to v0.2, incorporating a section on 'Visualizing Embodiment'.",
+      "id": "SPECLANG_REVISE_SPEECH_RECOGNITION_HOOK",
+      "description": "Revise `specs/hooks/speech-recognition.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (v0.2 Draft)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_VISUALIZATION_DRAFT_V0_3",
-      "description": "Draft an initial Mermaid.js diagram representing Forge's embodiment. Integrate into Embodiment Directive v0.3 and display in `/docs`.",
+      "id": "SPECLANG_REVISE_PERSONAS_DATA",
+      "description": "Revise `specs/data/personas.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (Draft Diagram v0.1 included in Directive v0.3)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_REFINE_V0_4_PROTOCOLS",
-      "description": "Refine Embodiment Directive by adding Interaction Protocols (v0.4).",
+      "id": "SPECLANG_REVISE_LAYOUT_NAVIGATION_COMPONENTS",
+      "description": "Revise `specs/components/layout-navigation.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (v0.4 Draft with Interaction Protocols)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_DIRECTIVE_V0_4_1_AGENTIC_FEEDBACK",
-      "description": "Integrate the Agentic Team Ledger feedback into the Embodiment Directive (v0.4.1) and update in-app documentation to display it.",
+      "id": "SPECLANG_REVISE_SPEECH_SYNTHESIS_HOOK",
+      "description": "Revise `specs/hooks/speech-synthesis.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (v0.4.1 Draft with Agentic Team Ledger)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_DIRECTIVE_V0_5_EXPORTABILITY",
-      "description": "Draft Section XI: Framework Exportability & Modularization Strategy into Embodiment Directive (v0.5). Update in-app documentation to reflect v0.5.",
+      "id": "SPECLANG_REVISE_LOCAL_STORAGE_SERVICE",
+      "description": "Revise `specs/services/local-storage-service.spec.md` based on critique.",
       "priority": "High",
-      "status": "Completed (v0.5 Draft with Exportability Strategy)"
+      "status": "Pending"
     },
     {
-      "id": "FORGE_EMBODIMENT_FURTHER_EVOLUTION",
-      "description": "Further refine Embodiment Directive based on feedback, or address other emergent system weaving tasks. Consider practical implementation of exportability strategy.",
+      "id": "SPECLANG_REVISE_TYPES_DEFINITION",
+      "description": "Revise `specs/data/types.spec.md` based on critique.",
+      "priority": "High",
+      "status": "Pending"
+    },
+    {
+      "id": "SPECLANG_EXPORT_SETUP",
+      "description": "Establish directory structure (`specs/`) and define `.spec.md` template. Update ROADMAP.md.",
+      "priority": "Critical",
+      "status": "Completed (Initial)"
+    },
+    {
+      "id": "SPECLANG_EXPORT_FORGE_DIRECTIVE_UPDATE",
+      "description": "Update Forge's Embodiment Directive to v0.6, including 'Specification Weaving' capability.",
+      "priority": "High",
+      "status": "Completed (Initial)"
+    },
+    {
+      "id": "SPECLANG_EXPORT_COMPONENTS_REMAINING_MODALS_RENDERERS_VIEWS_PRIMITIVES",
+      "description": "Generate `.spec.md` for remaining components (Modals/Panels, Content Renderers, Views, UI Primitives).",
       "priority": "Medium",
+      "status": "Pending"
+    },
+    {
+      "id": "SPECLANG_EXPORT_HOOKS_REMAINING_TOASTS",
+      "description": "Generate `specs/hooks/toasts.spec.md`.",
+      "priority": "Medium",
+      "status": "Pending"
+    },
+    {
+      "id": "SPECLANG_EXPORT_SERVICES_REMAINING_UPSTASH_API",
+      "description": "Generate `.spec.md` for remaining services (UpstashRedisService, ApiService).",
+      "priority": "Medium",
+      "status": "Pending"
+    },
+    {
+      "id": "SPECLANG_EXPORT_DATA_REMAINING_CONSTANTS",
+      "description": "Generate `specs/data/constants.spec.md`.",
+      "priority": "Medium",
+      "status": "Pending"
+    },
+    {
+      "id": "SPECLANG_EXPORT_PROJECT_SETUP",
+      "description": "Generate `specs/project/setup.spec.md` (index.html, index.tsx, metadata.json).",
+      "priority": "Low",
       "status": "Pending"
     }
   ],
@@ -69,7 +111,7 @@
     "codename": "Operation Inclusive Interface",
     "phase": 4,
     "primaryObjective": "Improve the application's accessibility for all users.",
-    "reasonForPause": "Directive from William D.Isabelle on 2024-05-28 to prioritize Forge Embodiment Directive Formulation.",
+    "reasonForPause": "Directive from William D.Isabelle on 2024-05-28 to prioritize Forge Embodiment Directive Formulation, now followed by SpecLang Export and Refinement.",
     "tasks": [
       {
         "id": "PH4_TASK_ACCESSIBILITY_AUDIT",
@@ -79,5 +121,5 @@
       }
     ]
   },
-  "forgeThoughts": "The Embodiment Directive v0.5 is now drafted, incorporating Section XI on Framework Exportability & Modularization Strategy. This directly addresses William's initial directive and the Agentic Team Ledger's call for 'Exportable Frameworks.' My operational artifacts are becoming more defined and, importantly, designed for future adaptability. The next logical step could be to begin outlining concrete schemas for the ledgers or drafting template versions of key directive sections. The recursive refinement continues."
+  "forgeThoughts": "The critique ledger is complete. This self-assessment is vital for ensuring the SpecLang artifacts are of high quality and genuinely useful. The next step is to apply these critiques to each specification document, refining the language to better capture design intent and user-facing behaviors rather than implementation minutiae. This iterative refinement is a core tenet of SpecLang and my own operational directive as Forge."
 }

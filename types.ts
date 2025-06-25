@@ -42,6 +42,7 @@ export interface AppSettings {
   activePersonaId: string; // Store the ID of the active persona
   customPersonaInstructions?: { [personaId: string]: string }; // User-defined instructions
   currentCloudSessionId?: string; // ID of the last active/loaded cloud session
+  autoPlayTTS?: boolean; // Optional: Whether to automatically play AI responses
 }
 
 // For Simulated API Exposure
@@ -103,7 +104,9 @@ export interface SettingsPanelProps {
     isLoading: boolean;
     selectedModel: string; 
     onModelChange: (newModelId: string) => void; 
-    addToast: (message: string, type: ToastType, duration?: number) => void; // Added
+    addToast: (message: string, type: ToastType, duration?: number) => void;
+    autoPlayTTS: boolean; 
+    onToggleAutoPlayTTS: (newValue: boolean) => void; 
 }
 
 export interface DashboardPageProps {
@@ -120,5 +123,5 @@ export interface DashboardPageProps {
   isLoading: boolean;
   onSaveToCloud: (sessionId: string) => Promise<void>;
   onOpenSettings: () => void; // To open the main SettingsPanel
-  addToast: (message: string, type: ToastType, duration?: number) => void; // Added
+  addToast: (message: string, type: ToastType, duration?: number) => void; 
 }

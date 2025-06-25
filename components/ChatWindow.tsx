@@ -28,7 +28,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ messages, isLoading }) => {
 
 
   return (
-    <div className="flex-grow p-4 sm:p-6 pt-[104px] overflow-y-auto bg-gpt-dark"> {/* Changed from pt-[70px] to pt-[104px] */}
+    <div className="flex-grow p-4 sm:p-6 overflow-y-auto bg-gpt-dark"> {/* Removed pt-[104px], relying on p-4/p-6 for top padding now */}
       {messages.map((msg) => (
         <ChatMessage key={msg.id} message={msg} />
       ))}

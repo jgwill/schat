@@ -1,8 +1,10 @@
 
+
+
 import React, { useState, useEffect } from 'react';
 import { AVAILABLE_MODELS, GEMINI_TEXT_MODEL } from '../constants';
 import LoadingSpinner from './LoadingSpinner';
-import { SettingsPanelProps, ToastType } from '../types'; // Ensure this is imported if not already
+import { SettingsPanelProps, ToastType } from '../types'; 
 
 const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
   isOpen,
@@ -18,7 +20,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
   isLoading,
   selectedModel,
   onModelChange,
-  addToast, // Added prop
+  addToast,
+  autoPlayTTS, 
+  onToggleAutoPlayTTS, 
 }) => {
   const [cloudSessionIdInput, setCloudSessionIdInput] = useState<string>(currentCloudSessionId || '');
   const [modelInput, setModelInput] = useState<string>(selectedModel);
@@ -37,7 +41,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
         return;
     }
     if (trimmedModelInput !== selectedModel) {
-        onModelChange(trimmedModelInput); // App.tsx will show success toast
+        onModelChange(trimmedModelInput); 
     } else {
         addToast("Model ID hasn't changed from the current active model.", ToastType.Info);
     }
@@ -50,28 +54,29 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
     }
     const idToUse = cloudSessionIdInput.trim();
 
-    // Confirmation for delete action
     if (action === 'delete') {
         if (!confirm(`Are you sure you want to delete cloud session "${idToUse}"? This cannot be undone.`)) {
             return;
         }
     }
 
-
     switch(action) {
         case 'save':
-            await onSaveToCloud(idToUse); // App.tsx will show toast
+            await onSaveToCloud(idToUse); 
             break;
         case 'load':
-            await onLoadFromCloud(idToUse); // App.tsx will show toast
+            await onLoadFromCloud(idToUse); 
             break;
         case 'delete':
-            await onDeleteFromCloud(idToUse); // App.tsx will show toast
-            if(cloudSessionIdInput === idToUse) setCloudSessionIdInput(''); // Clear input if deleted session was active in input
+            await onDeleteFromCloud(idToUse); 
+            if(cloudSessionIdInput === idToUse) setCloudSessionIdInput(''); 
             break;
     }
   };
 
+  const handleAutoPlayTTSToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onToggleAutoPlayTTS(e.target.checked);
+  };
 
   if (!isOpen) return null;
 
@@ -121,7 +126,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                 className="w-full p-2.5 bg-gpt-gray text-gpt-text rounded-md border border-gray-600 focus:ring-brand-secondary focus:border-brand-secondary"
                 disabled={isLoading}
               />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button onClick={() => handleCloudSessionAction('save')} disabled={isLoading || !cloudSessionIdInput.trim()} className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50">
                   {isLoading ? <LoadingSpinner/> : "Save to Cloud"}
                 </button>
@@ -145,20 +150,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                         </button>
                         <button 
                             onClick={() => {
-                                // Set input first to ensure the correct ID is used by handleCloudSessionAction
                                 setCloudSessionIdInput(sid); 
-                                // Action now relies on the state of cloudSessionIdInput, which might not update immediately.
-                                // So, pass sid directly to action handler if it's specific to this button click.
-                                // However, to keep handleCloudSessionAction generic:
-                                // 1. Set state
-                                // 2. Call action (it will use the state)
-                                // For delete, we need to ensure the correct ID is acted upon, so a temporary direct pass might be better
-                                // but for consistency, we rely on state, so user sees what is being acted on.
-                                // The current structure of handleCloudSessionAction uses cloudSessionIdInput.
                                 handleCloudSessionAction('delete');
                             }}
                             className="text-xs text-red-500 hover:text-red-400 p-1"
-                            disabled={isLoading || !sid} // disable if sid somehow empty
+                            disabled={isLoading || !sid} 
                             title={`Delete cloud session: ${sid}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.71l.5 6.5a.75.75 0 1 1-1.498.116l-.5-6.5A.75.75 0 0 1 6.05 6Zm3.902 0a.75.75 0 0 1 .712.787l-.5 6.5a.75.75 0 1 1-1.498-.116l.5-6.5A.75.75 0 0 1 9.95 6Z" clipRule="evenodd" /></svg>
@@ -201,6 +197,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
                 <li>tunedModels/your-tuned-model-id</li>
             </ul>
           </div>
+
+          {/* Audio Preferences Section */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-300 mb-2">Audio Preferences</h3>
+            <div className="flex items-center justify-between p-2.5 bg-gpt-gray rounded-md border border-gray-600">
+              <label htmlFor="autoPlayTTSToggle" className="text-gpt-text text-sm cursor-pointer select-none">
+                Auto-play AI responses
+              </label>
+              <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input
+                  type="checkbox"
+                  name="autoPlayTTSToggle"
+                  id="autoPlayTTSToggle"
+                  checked={autoPlayTTS}
+                  onChange={handleAutoPlayTTSToggle}
+                  disabled={isLoading}
+                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <label
+                  htmlFor="autoPlayTTSToggle"
+                  className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-500 cursor-pointer"
+                ></label>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">If enabled, AI messages will be read aloud automatically when received.</p>
+          </div>
+
+
            {/* Clear Chat */}
           <div>
             <h3 className="text-lg font-medium text-gray-300 mb-2">Danger Zone</h3>
@@ -217,14 +241,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = React.memo(({
             width: 8px;
           }
           .custom-scrollbar::-webkit-scrollbar-track {
-            background: #202123; // gpt-dark
+            background: #202123; 
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #444654; // gpt-gray
+            background: #444654; 
             border-radius: 4px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555869;
+          }
+          .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3B82F6; /* brand-secondary */
+            background-color: #fff; 
+          }
+          .toggle-checkbox:checked + .toggle-label {
+            background-color: #3B82F6; /* brand-secondary */
+          }
+          .toggle-checkbox {
+            /* Positioning for unchecked state */
+            transform: translateX(0); /* Default: left */
+            transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+          }
+          .toggle-checkbox:checked {
+            transform: translateX(1rem); /* Moves the inner circle to the right */
+          }
+          /* Basic toggle styles: ensure the label acts as the track */
+          .toggle-label {
+            transition: background-color 0.2s ease-in-out;
           }
         `}</style>
       </div>

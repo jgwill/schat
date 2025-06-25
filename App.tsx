@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import ChatWindow from './components/ChatWindow';
@@ -7,6 +9,7 @@ import SettingsPanel from './components/SettingsPanel';
 import DocsPage from './components/DocsPage';
 import DashboardPage from './components/DashboardPage';
 import PersonaSelectorBar from './components/PersonaSelectorBar'; 
+import ToastNotification from './components/ToastNotification'; // Import new ToastNotification component
 import { Message, Sender, AppView, Persona, AppSettings, ApiActionType, ApiActionPayload, ApiSendMessagePayload, ApiChangePersonaPayload, ApiSetViewPayload, ToastType, ToastMessage } from './types';
 import * as GeminiService from './services/GeminiService';
 import * as UpstashRedisService from './services/UpstashRedisService'; 
@@ -14,7 +17,59 @@ import { saveChatSession, loadChatSession, clearChatSessionFromStorage, saveAppS
 import { USER_AVATAR_SVG, GEMINI_TEXT_MODEL } from './constants';
 import { ALL_PERSONAS, getPersonaById, DEFAULT_PERSONA_ID, getEffectiveSystemInstruction } from './personas';
 import { MIA_API_EVENT_NAME } from './services/ApiService';
-import useToasts from './hooks/useToasts'; // Import useToasts
+import useToasts from './hooks/useToasts'; 
+import { MESSAGE_TEMPLATES, DEFAULT_WELCOME_MESSAGE_TEMPLATE, DEFAULT_PERSONA_CHANGE_MESSAGE_TEMPLATE } from './messageTemplates'; 
+
+// Helper function to sanitize text for speech, removing Markdown syntax
+const sanitizeTextForSpeech = (markdown: string): string => {
+  if (!markdown) return '';
+
+  let text = markdown;
+
+  // Remove images or replace with alt text. For speech, alt text is good.
+  // ![Alt Text](image.url) -> Alt Text
+  text = text.replace(/!\[(.*?)\]\(.*?\)/g, '$1');
+
+  // Remove links but keep the link text.
+  // [Link Text](link.url) -> Link Text
+  text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+
+  // Remove bold, italics, strikethrough, keeping the text.
+  text = text.replace(/(\*\*|__)(.*?)\1/g, '$2'); // Bold
+  text = text.replace(/(\*|_)(.*?)\1/g, '$2');    // Italics
+  text = text.replace(/~~(.*?)~~/g, '$1');        // Strikethrough
+
+  // Remove inline code backticks, keeping the text.
+  text = text.replace(/`([^`]+)`/g, '$1');
+
+  // Remove code blocks (fences only, basic attempt to keep content)
+  text = text.replace(/```[\s\S]*?```/g, (match) => 
+    match.replace(/```/g, '').replace(/^[\w-]+\n/, '').trim() // Remove language hint and fences
+  );
+  text = text.replace(/~~~[\s\S]*?~~~/g, (match) => 
+    match.replace(/~~~/g, '').replace(/^[\w-]+\n/, '').trim() // Remove language hint and fences
+  );
+  
+  // Remove headings (e.g., #, ##), keeping the text after hashes.
+  text = text.replace(/^#{1,6}\s+/gm, '');
+
+  // Remove horizontal rules.
+  text = text.replace(/^(?:---|\*\*\*|___)\s*$/gm, '');
+
+  // Remove blockquotes, keeping the text.
+  text = text.replace(/^>\s+/gm, '');
+
+  // Remove list item markers (unordered and ordered), keeping the text.
+  text = text.replace(/^[-*+]\s+/gm, '');
+  text = text.replace(/^\d+\.\s+/gm, '');
+  
+  // Replace multiple newlines with a single space to avoid long pauses
+  text = text.replace(/\n+/g, ' ');
+
+  // Trim and ensure single spaces
+  return text.replace(/\s+/g, ' ').trim();
+};
+
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -23,21 +78,80 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   
-  const { toasts, addToast, removeToast } = useToasts(); // Initialize useToasts
+  const { toasts, addToast, removeToast } = useToasts(); 
 
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     const loaded = loadAppSettings(); 
-    return loaded || { 
-      activePersonaId: DEFAULT_PERSONA_ID,
-      selectedModel: GEMINI_TEXT_MODEL, 
-      customPersonaInstructions: {},
-      currentCloudSessionId: undefined,
-    };
+    return loaded; 
   });
 
   const [availableCloudSessions, setAvailableCloudSessions] = useState<string[]>([]);
 
   const activePersona = getPersonaById(appSettings.activePersonaId);
+
+  const speakText = useCallback((
+    textToSpeakOriginal: string, 
+    contextMessage: string = "Auto-play",
+    isInitialAutoplay: boolean = false // Flag for initial, non-interactive autoplay
+  ) => {
+    if (!textToSpeakOriginal || textToSpeakOriginal.trim() === '') {
+        console.log(`${contextMessage} TTS: Original text is empty, nothing to speak.`);
+        return;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Ensure any previous speech is stopped
+        const textToSpeakSanitized = sanitizeTextForSpeech(textToSpeakOriginal);
+
+        if (textToSpeakSanitized.trim() === '') {
+            if (textToSpeakOriginal.trim() !== '') {
+                console.warn(`${contextMessage} TTS: Sanitized text is empty, though original was not. Nothing to speak.`);
+                addToast(`${contextMessage}: Content was empty after Markdown removal.`, ToastType.Info, 2500);
+            } else {
+                console.log(`${contextMessage} TTS: Original and sanitized text is empty, nothing to speak.`);
+            }
+        } else {
+            const utterance = new SpeechSynthesisUtterance(textToSpeakSanitized);
+            utterance.lang = 'en-US'; // Or make this configurable
+            
+            utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+                // Always log the error for debugging
+                console.error(`${contextMessage} TTS speech error: ${event.error}`, event);
+                
+                // List of errors considered critical enough to show a toast
+                const criticalToastErrors = [
+                    'service-not-allowed',
+                    'language-unavailable', // More specific than synthesis-unavailable
+                    'voice-unavailable',
+                    'synthesis-unavailable', // General synthesis engine issue
+                    'synthesis-failed',      // If synthesis fails outright
+                    'network',               // If a network voice fails
+                    'audio-hardware'         // If there's a hardware problem
+                ];
+
+                if (event.error === 'not-allowed') {
+                    if (isInitialAutoplay) {
+                        // Suppress toast for "not-allowed" on initial, non-interactive autoplay
+                        console.warn(`${contextMessage} TTS: Initial auto-play was blocked by browser policy (error: ${event.error}). No toast shown.`);
+                    } else {
+                        // For subsequent 'not-allowed' errors, it's critical as it implies a change in permissions
+                        addToast(`${contextMessage} TTS Error: Speech synthesis not allowed. Please check browser/OS permissions.`, ToastType.Error);
+                    }
+                } else if (criticalToastErrors.includes(event.error)) {
+                    // For other defined critical errors, show a toast
+                    addToast(`${contextMessage} TTS Error: ${event.error}. Speech may not be available.`, ToastType.Error);
+                } else {
+                    // For all other errors (e.g., 'interrupted', 'audio-busy', 'canceled', 'text-too-long', 'invalid-argument', or unknown ones),
+                    // only log to console and do not show a user-facing toast.
+                    console.warn(`${contextMessage} TTS: Non-critical error '${event.error}' occurred. Playback might be affected. No toast shown.`);
+                }
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+    } else {
+        addToast(`${contextMessage} TTS: Speech synthesis not supported by this browser.`, ToastType.Warning);
+    }
+  }, [addToast]);
+
 
   const createSystemMessage = useCallback((persona: Persona, text: string, isError: boolean = false): Message => ({
     id: crypto.randomUUID(),
@@ -50,16 +164,28 @@ const App: React.FC = () => {
     isError: isError,
   }), []);
   
-  const createInitialWelcomeMessage = useCallback((persona: Persona, instruction: string, modelUsed?: string): Message => ({
-    id: crypto.randomUUID(),
-    sender: Sender.AI,
-    text: `Welcome to Mia's Gem Chat Studio! I am ${persona.name}. ${instruction === persona.systemInstruction ? "Using default guidelines." : "Using custom guidelines."} ${modelUsed ? `Current model: ${modelUsed}. ` : ''}How can I assist you today?`,
-    timestamp: new Date(),
-    avatar: persona.avatarPath,
-    name: persona.name,
-    aiBubbleClassName: persona.color,
-    isError: false,
-  }), []);
+  const createInitialWelcomeMessage = useCallback((persona: Persona, effectiveInstruction: string, modelUsed?: string): Message => {
+    const instructionStatusMessage = effectiveInstruction === persona.systemInstruction ? "" : "";
+    
+    const personaSpecificTemplates = MESSAGE_TEMPLATES[persona.id];
+    const welcomeTemplate = personaSpecificTemplates?.welcomeMessageTemplate || DEFAULT_WELCOME_MESSAGE_TEMPLATE;
+
+    let welcomeText = welcomeTemplate
+      .replace('{personaName}', persona.name)
+      .replace('{instructionStatusMessage}', instructionStatusMessage)
+      .replace('{modelName}', modelUsed || 'default');
+    
+    return {
+        id: crypto.randomUUID(),
+        sender: Sender.AI,
+        text: welcomeText,
+        timestamp: new Date(),
+        avatar: persona.avatarPath,
+        name: persona.name,
+        aiBubbleClassName: persona.color,
+        isError: false,
+    };
+  }, []);
 
 
   const refreshCloudSessionsList = useCallback(async () => {
@@ -78,13 +204,8 @@ const App: React.FC = () => {
     if (!apiKeyStatus.configured) {
         const errorMsg = apiKeyStatus.message + " Please check the Docs for setup instructions.";
         setApiKeyError(errorMsg);
-        addToast(errorMsg, ToastType.Error, 10000); // Longer duration for critical error
-    // Removed the specific 'else if' block for "legacy API_KEY" warning.
-    // If apiKeyStatus.configured is true, it will fall into the 'else' below.
+        addToast(errorMsg, ToastType.Error, 10000); 
     } else {
-        // This will now also cover the case where the legacy API_KEY is used.
-        // GeminiService.ts already logs to console if legacy key is used.
-        // No toast or specific error bar will be shown for just the legacy key warning.
         setApiKeyError(null); 
     }
 
@@ -116,12 +237,21 @@ const App: React.FC = () => {
     GeminiService.reinitializeChatWithHistory(
         loadedSettings.selectedModel,
         initialEffectiveInstruction,
-        messagesToInitializeWith.filter(msg => !(msg.sender === Sender.AI && (msg.text.startsWith("Welcome") || msg.isError)))
+        messagesToInitializeWith.filter(msg => !(msg.sender === Sender.AI && (msg.isError || msg.id === messagesToInitializeWith.find(wm => wm.text.includes("Welcome") || wm.text.includes("System Online") || wm.text.includes("Oh, hello there") || wm.text.includes("Greetings") )?.id ))) 
     );
 
     refreshCloudSessionsList();
+
+    if (loadedSettings.autoPlayTTS) {
+        const lastAiMessage = [...messagesToInitializeWith].reverse().find(
+            (msg) => msg.sender === Sender.AI && !msg.isError && msg.text && msg.text.trim() !== ''
+        );
+        if (lastAiMessage && lastAiMessage.text) {
+            speakText(lastAiMessage.text, "Initial message auto-play", true); // Pass true for isInitialAutoplay
+        }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createInitialWelcomeMessage, refreshCloudSessionsList, addToast]);
+  }, []); 
 
   const handleSendMessage = useCallback(async (
     text: string, 
@@ -179,6 +309,8 @@ const App: React.FC = () => {
       }
     }
 
+    let streamErrorOccurred = false;
+
     await GeminiService.sendMessageStreamToAI(
       trimmedText,
       (chunkText) => { 
@@ -191,6 +323,7 @@ const App: React.FC = () => {
         );
       },
       (errorMessage, isDefinitiveError) => { 
+        streamErrorOccurred = true;
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
             msg.id === aiMessagePlaceholderId
@@ -198,17 +331,24 @@ const App: React.FC = () => {
               : msg
           )
         );
-        addToast(errorMessage, ToastType.Error); // Show error in toast as well
+        addToast(errorMessage, ToastType.Error); 
         setIsLoading(false); 
       },
       () => { 
         setIsLoading(false);
+        setMessages(prevMessages => {
+            const completedMessage = prevMessages.find(msg => msg.id === aiMessagePlaceholderId);
+            if (appSettings.autoPlayTTS && !streamErrorOccurred && completedMessage && completedMessage.text && !completedMessage.isError) {
+                speakText(completedMessage.text, "AI response auto-play"); // isInitialAutoplay defaults to false
+            }
+            return prevMessages;
+        });
       },
       serviceImageData,
       serviceAudioData
     );
 
-  }, [activePersona, apiKeyError, addToast]);
+  }, [activePersona, apiKeyError, addToast, appSettings.autoPlayTTS, speakText]);
 
   const handleClearChat = useCallback(() => {
     const currentInstruction = getEffectiveSystemInstruction(appSettings.activePersonaId, appSettings.customPersonaInstructions);
@@ -261,14 +401,22 @@ const App: React.FC = () => {
       saveAppSettings(updatedSettings);
 
       addToast("Local chat session loaded!", ToastType.Success);
+
+       if (appSettings.autoPlayTTS) {
+          const lastAiMessageFromLoaded = [...newMessages, systemNotification].reverse().find(
+              (msg) => msg.sender === Sender.AI && !msg.isError && msg.text && msg.text.trim() !== ''
+          );
+          if (lastAiMessageFromLoaded && lastAiMessageFromLoaded.text) {
+             speakText(lastAiMessageFromLoaded.text, "Loaded local session auto-play", true); // Pass true for isInitialAutoplay
+          }
+      }
     } else {
       addToast("No saved local chat session found or session is empty.", ToastType.Warning);
     }
     setIsSettingsOpen(false);
-  }, [appSettings, createSystemMessage, addToast]);
+  }, [appSettings, createSystemMessage, addToast, speakText]); 
 
   const handleSaveToCloud = useCallback(async (sessionId: string) => {
-    // Validation for empty sessionId is handled in SettingsPanel/DashboardPage or by addToast call there
     setIsLoading(true);
     try {
       await UpstashRedisService.saveSessionToCloud(sessionId, messages, appSettings);
@@ -286,7 +434,6 @@ const App: React.FC = () => {
   }, [messages, appSettings, refreshCloudSessionsList, addToast]);
 
   const handleLoadFromCloud = useCallback(async (sessionId: string) => {
-    // Validation for empty sessionId handled in SettingsPanel or by addToast call there
     setIsLoading(true);
     try {
       const loadedData = await UpstashRedisService.loadSessionFromCloud(sessionId);
@@ -321,6 +468,16 @@ const App: React.FC = () => {
 
         clearChatSessionFromStorage(); 
         addToast(`Session "${sessionId}" loaded from cloud (simulated).`, ToastType.Success);
+
+        if (cloudSettings.autoPlayTTS) {
+            const lastAiMessageFromCloud = [...newMessages, systemNotification].reverse().find(
+                (msg) => msg.sender === Sender.AI && !msg.isError && msg.text && msg.text.trim() !== ''
+            );
+            if (lastAiMessageFromCloud && lastAiMessageFromCloud.text) {
+                speakText(lastAiMessageFromCloud.text, "Loaded cloud session auto-play", true); // Pass true for isInitialAutoplay
+            }
+        }
+
       } else {
         addToast(`Cloud session "${sessionId}" not found or is empty.`, ToastType.Warning);
       }
@@ -331,18 +488,24 @@ const App: React.FC = () => {
       setIsLoading(false);
       setIsSettingsOpen(false);
     }
-  }, [createSystemMessage, addToast]);
+  }, [createSystemMessage, addToast, speakText]);
 
   const handleDeleteFromCloud = useCallback(async (sessionId: string) => {
-    // Validation for empty sessionId & confirmation handled in SettingsPanel
     setIsLoading(true);
     try {
         await UpstashRedisService.deleteCloudSession(sessionId);
         await refreshCloudSessionsList();
         if (appSettings.currentCloudSessionId === sessionId) {
             const currentInstruction = getEffectiveSystemInstruction(appSettings.activePersonaId, appSettings.customPersonaInstructions);
+            const personaForWelcome = getPersonaById(appSettings.activePersonaId);
             GeminiService.resetChatSession(currentInstruction); 
-            setMessages([createInitialWelcomeMessage(activePersona, currentInstruction, appSettings.selectedModel)]);
+            
+            const welcomeMsg = createInitialWelcomeMessage(personaForWelcome, currentInstruction, appSettings.selectedModel);
+            setMessages([welcomeMsg]);
+
+            if (appSettings.autoPlayTTS && welcomeMsg.text && !welcomeMsg.isError) {
+                 speakText(welcomeMsg.text, "Post-cloud delete welcome auto-play", true); // Pass true for isInitialAutoplay
+            }
             
             const updatedSettings = { ...appSettings, currentCloudSessionId: undefined };
             setAppSettings(updatedSettings);
@@ -355,7 +518,8 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [appSettings, activePersona, refreshCloudSessionsList, createInitialWelcomeMessage, addToast]);
+  }, [appSettings, createInitialWelcomeMessage, refreshCloudSessionsList, addToast, speakText]);
+
 
   const handleChangePersona = useCallback((newPersonaId: string) => {
     const newPersona = getPersonaById(newPersonaId);
@@ -379,12 +543,20 @@ const App: React.FC = () => {
         newEffectiveInstruction, 
         messages.filter(msg => !(msg.sender === Sender.AI && msg.isError)) 
     );
+    
+    const personaSpecificTemplates = MESSAGE_TEMPLATES[newPersona.id];
+    const changeTemplate = personaSpecificTemplates?.personaChangeMessageTemplate || DEFAULT_PERSONA_CHANGE_MESSAGE_TEMPLATE;
+    const personaChangeText = changeTemplate.replace('{newPersonaName}', newPersona.name);
 
-    const systemNotification = createSystemMessage(newPersona, `${newPersona.name} has joined the conversation. The chat history is maintained.`);
+    const systemNotification = createSystemMessage(newPersona, personaChangeText);
     setMessages(prev => [...prev, systemNotification]);
     addToast(`Persona changed to ${newPersona.name}.`, ToastType.Info);
+    
+    if (appSettings.autoPlayTTS && systemNotification.text && !systemNotification.isError) {
+        speakText(systemNotification.text, "Persona change auto-play"); // isInitialAutoplay defaults to false
+    }
 
-  }, [appSettings, messages, createSystemMessage, addToast]);
+  }, [appSettings, messages, createSystemMessage, addToast, speakText]);
 
   const handleUpdatePersonaInstruction = useCallback((personaId: string, newInstruction: string) => {
     const newCustomInstructions = {
@@ -406,10 +578,14 @@ const App: React.FC = () => {
       const systemNotification = createSystemMessage(targetPersona, `Instructions for ${targetPersona.name} updated. The conversation continues with history.`);
       setMessages(prev => [...prev, systemNotification]);
       addToast(`Instructions for ${targetPersona.name} updated. Conversation continues.`, ToastType.Success);
+
+        if (appSettings.autoPlayTTS && systemNotification.text && !systemNotification.isError) {
+            speakText(systemNotification.text, "Instruction update auto-play"); // isInitialAutoplay defaults to false
+        }
     } else {
       addToast(`Instructions for ${targetPersona.name} updated.`, ToastType.Success);
     }
-  }, [appSettings, messages, createSystemMessage, addToast]);
+  }, [appSettings, messages, createSystemMessage, addToast, speakText]);
   
   const handleResetPersonaInstruction = useCallback((personaId: string) => {
     const personaToReset = getPersonaById(personaId);
@@ -431,30 +607,48 @@ const App: React.FC = () => {
       const systemNotification = createSystemMessage(personaToReset, `Instructions for ${personaToReset.name} reset to default. The conversation continues with history.`);
       setMessages(prev => [...prev, systemNotification]);
       addToast(`Instructions for ${personaToReset.name} reset to default. Conversation continues.`, ToastType.Success);
+
+        if (appSettings.autoPlayTTS && systemNotification.text && !systemNotification.isError) {
+            speakText(systemNotification.text, "Instruction reset auto-play"); // isInitialAutoplay defaults to false
+        }
     } else {
       addToast(`Instructions for ${personaToReset.name} reset to default.`, ToastType.Success);
     }
-  }, [appSettings, messages, createSystemMessage, addToast]);
+  }, [appSettings, messages, createSystemMessage, addToast, speakText]);
 
   const handleModelChange = useCallback((newModelId: string) => {
-    // Validation for empty/same model ID handled in SettingsPanel or by addToast there
     const trimmedModelId = newModelId.trim();
     const updatedSettings = { ...appSettings, selectedModel: trimmedModelId };
     setAppSettings(updatedSettings);
     saveAppSettings(updatedSettings);
 
     const currentInstruction = getEffectiveSystemInstruction(appSettings.activePersonaId, appSettings.customPersonaInstructions);
+    const personaForMessage = getPersonaById(appSettings.activePersonaId);
+
     GeminiService.reinitializeChatWithHistory(
         trimmedModelId, 
         currentInstruction, 
         messages.filter(msg => !(msg.sender === Sender.AI && msg.isError))
     );
     
-    const systemNotification = createSystemMessage(activePersona, `Model changed to **${trimmedModelId}**. The conversation continues with history.`);
+    const systemNotification = createSystemMessage(personaForMessage, `Model changed to **${trimmedModelId}**. The conversation continues with history.`);
     setMessages(prev => [...prev, systemNotification]);
     addToast(`AI Model changed to: ${trimmedModelId}. Conversation continues.`, ToastType.Success);
+
+    if (appSettings.autoPlayTTS && systemNotification.text && !systemNotification.isError) {
+        speakText(systemNotification.text, "Model change auto-play"); // isInitialAutoplay defaults to false
+    }
     setIsSettingsOpen(false); 
-  }, [appSettings, activePersona, messages, createSystemMessage, addToast]);
+  }, [appSettings, messages, createSystemMessage, addToast, speakText]);
+
+  const handleToggleAutoPlayTTS = useCallback((newValue: boolean) => {
+    setAppSettings(prevSettings => {
+      const updatedSettings = { ...prevSettings, autoPlayTTS: newValue };
+      saveAppSettings(updatedSettings);
+      addToast(`Auto-play AI responses ${newValue ? 'enabled' : 'disabled'}.`, ToastType.Info);
+      return updatedSettings;
+    });
+  }, [addToast]);
 
   const onToggleSettings = useCallback(() => {
       refreshCloudSessionsList(); 
@@ -510,63 +704,12 @@ const App: React.FC = () => {
     };
   }, [handleSendMessage, handleChangePersona, handleClearChat, setCurrentView, addToast]);
 
-  const ToastUI: React.FC<{toast: ToastMessage; onDismiss: (id: string) => void}> = ({toast, onDismiss}) => {
-    let bgColor = 'bg-gray-700';
-    let borderColor = 'border-gray-600';
-    let textColor = 'text-gray-100';
-
-    switch (toast.type) {
-        case ToastType.Success:
-            bgColor = 'bg-green-600';
-            borderColor = 'border-green-700';
-            textColor = 'text-white';
-            break;
-        case ToastType.Error:
-            bgColor = 'bg-red-600';
-            borderColor = 'border-red-700';
-            textColor = 'text-white';
-            break;
-        case ToastType.Info:
-            bgColor = 'bg-blue-600';
-            borderColor = 'border-blue-700';
-            textColor = 'text-white';
-            break;
-        case ToastType.Warning:
-            bgColor = 'bg-yellow-500';
-            borderColor = 'border-yellow-600';
-            textColor = 'text-black';
-            break;
-    }
-    
-    return (
-        <div 
-            key={toast.id}
-            className={`max-w-sm w-full ${bgColor} ${textColor} shadow-lg rounded-md p-3 my-2 border-l-4 ${borderColor} transition-all duration-300 ease-in-out transform opacity-0 animate-toast-in`}
-            role="alert"
-            style={{ animationFillMode: 'forwards' }}
-        >
-            <div className="flex items-start justify-between">
-                <p className="text-sm flex-grow">{toast.message}</p>
-                <button 
-                    onClick={() => onDismiss(toast.id)}
-                    className={`ml-2 -mt-1 -mr-1 p-1 rounded-md hover:bg-black hover:bg-opacity-20 transition-colors ${toast.type === ToastType.Warning ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-200'}`}
-                    aria-label="Dismiss notification"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    );
-  };
 
   const renderViewContent = () => {
     switch (currentView) {
       case AppView.Chat:
         return (
-          <div className="flex-grow flex flex-col w-full max-w-4xl lg:max-w-5xl mx-auto overflow-hidden">
-            {/* PersonaSelectorBar moved up for correct sticky behavior */}
+          <div className="flex-grow flex flex-col w-full md:max-w-4xl lg:max-w-5xl mx-auto overflow-hidden">
             <ChatWindow messages={messages} isLoading={isLoading} />
             <div className="border-t border-gpt-gray">
               <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
@@ -598,7 +741,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gpt-dark">
-      {apiKeyError && !toasts.some(t => t.message.includes("API Key")) && ( // Show top bar error if no API key toast visible
+      {apiKeyError && !toasts.some(t => t.message.includes("API Key")) && ( 
         <div className="bg-red-600 text-white p-3 text-center text-sm shadow-md">
           <p><strong>Configuration Error:</strong> {apiKeyError}</p>
         </div>
@@ -637,12 +780,13 @@ const App: React.FC = () => {
         selectedModel={appSettings.selectedModel}
         onModelChange={handleModelChange}
         addToast={addToast} 
+        autoPlayTTS={appSettings.autoPlayTTS || false}
+        onToggleAutoPlayTTS={handleToggleAutoPlayTTS}
       />
 
-      {/* Toast Container */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {toasts.map(toast => (
-            <ToastUI key={toast.id} toast={toast} onDismiss={removeToast} />
+            <ToastNotification key={toast.id} toast={toast} onDismiss={removeToast} />
         ))}
       </div>
       <style>{`

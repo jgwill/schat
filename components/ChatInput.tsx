@@ -25,7 +25,6 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
   const [recordedAudio, setRecordedAudio] = useState<{ dataUrl: string; mimeType: string; blob: Blob } | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  // Fix: Changed NodeJS.Timeout to number for browser compatibility
   const audioTimerIntervalRef = useRef<number | null>(null);
 
 
@@ -45,12 +44,51 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
 
   useEffect(() => {
     if (isListening) {
+        let interimTranscript = transcript;
+
+        // Define placeholders for spoken punctuation
+        const PERIOD_PLACEHOLDER = "__PERIOD__";
+        const COMMA_PLACEHOLDER = "__COMMA__";
+        const QUESTION_MARK_PLACEHOLDER = "__QUESTION_MARK__";
+        const EXCLAMATION_MARK_PLACEHOLDER = "__EXCLAMATION_MARK__";
+
+        // Step 1: Replace spoken punctuation keywords with placeholders, adding spaces around them
+        interimTranscript = interimTranscript.replace(/\bperiod\b/gi, ` ${PERIOD_PLACEHOLDER} `);
+        interimTranscript = interimTranscript.replace(/\bcomma\b/gi, ` ${COMMA_PLACEHOLDER} `);
+        interimTranscript = interimTranscript.replace(/\bquestion mark\b/gi, ` ${QUESTION_MARK_PLACEHOLDER} `);
+        interimTranscript = interimTranscript.replace(/\bexclamation mark\b/gi, ` ${EXCLAMATION_MARK_PLACEHOLDER} `);
+        interimTranscript = interimTranscript.replace(/\bexclamation point\b/gi, ` ${EXCLAMATION_MARK_PLACEHOLDER} `); // Common alternative
+
+        // Step 2: Replace placeholders with actual punctuation marks.
+        interimTranscript = interimTranscript.replace(new RegExp(PERIOD_PLACEHOLDER, 'g'), '.');
+        interimTranscript = interimTranscript.replace(new RegExp(COMMA_PLACEHOLDER, 'g'), ',');
+        interimTranscript = interimTranscript.replace(new RegExp(QUESTION_MARK_PLACEHOLDER, 'g'), '?');
+        interimTranscript = interimTranscript.replace(new RegExp(EXCLAMATION_MARK_PLACEHOLDER, 'g'), '!');
+
+        // Step 3: Clean up spacing around the newly inserted punctuation.
+        // 3a. Consolidate multiple spaces into one.
+        interimTranscript = interimTranscript.replace(/\s+/g, ' ');
+
+        // 3b. Remove any space before punctuation marks.
+        interimTranscript = interimTranscript.replace(/\s+\./g, '.');
+        interimTranscript = interimTranscript.replace(/\s+,/g, ',');
+        interimTranscript = interimTranscript.replace(/\s+\?/g, '?');
+        interimTranscript = interimTranscript.replace(/\s+!/g, '!');
+
+        // 3c. Ensure there's a space after punctuation if it's followed by a letter or number (start of a new word).
+        // This avoids "word.Nextword" and ensures "word. Nextword".
+        interimTranscript = interimTranscript.replace(/\.(?=[a-zA-Z0-9])/g, '. ');
+        interimTranscript = interimTranscript.replace(/,(?=[a-zA-Z0-9])/g, ', ');
+        // Question marks and exclamation marks naturally have a space after them if followed by a new sentence/word.
+        // However, we should ensure it if we added a placeholder that might have disrupted natural spacing.
+        interimTranscript = interimTranscript.replace(/\?(?=[a-zA-Z0-9])/g, '? ');
+        interimTranscript = interimTranscript.replace(/!(?=[a-zA-Z0-9])/g, '! ');
+        
+        // 3d. Final trim of the processed segment.
+        const finalProcessedTranscript = interimTranscript.trim();
+
         const base = textBeforeSpeechStartRef.current;
-        let combinedText = base;
-        if (transcript && transcript.length > 0) {
-            combinedText = base ? base + ' ' + transcript : transcript;
-        }
-        setInputValue(combinedText);
+        setInputValue(base + finalProcessedTranscript);
     }
   }, [transcript, isListening]);
 
@@ -110,9 +148,33 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
     if (isAudioRecording) return; // Prevent if audio message recording is active
     if (isListening) {
       stopListening();
+      // When stopping, inputValue is already up-to-date with the full transcript.
+      // textBeforeSpeechStartRef remains as it was at the start of this segment.
     } else {
-      textBeforeSpeechStartRef.current = inputValue; 
-      startListening(); 
+      // User is clicking to start listening
+      let currentInput = inputValue;
+      let nextBaseText = "";
+
+      const trimmedInputCheck = currentInput.trimRight(); // For checking punctuation without existing trailing spaces
+
+      if (trimmedInputCheck !== "") { // If there's some non-whitespace content
+        if (/[.!?]$/.test(trimmedInputCheck)) { // Ends with sentence punctuation
+          // Ensure there's a space after it for the next segment
+          if (!/\s$/.test(currentInput)) { // Original input didn't have a trailing space after punctuation
+            nextBaseText = currentInput + ' ';
+          } else { // Original input already had a space after punctuation
+            nextBaseText = currentInput; 
+          }
+        } else { // Doesn't end with sentence punctuation, so add period and space
+          nextBaseText = trimmedInputCheck + '. '; 
+        }
+      } else {
+        nextBaseText = ""; // If input was empty or just spaces, start fresh
+      }
+      
+      setInputValue(nextBaseText); // Update UI immediately with any new punctuation/space
+      textBeforeSpeechStartRef.current = nextBaseText; 
+      startListening(); // This will reset the hook's internal transcript for the new segment
     }
   };
 
@@ -177,19 +239,21 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
             const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorderRef.current?.mimeType || 'audio/webm' });
             const audioUrl = URL.createObjectURL(audioBlob);
             
-            // Convert Blob to base64 Data URL for persistent storage in Message
             const reader = new FileReader();
             reader.onloadend = () => {
                 setRecordedAudio({
                     dataUrl: reader.result as string,
                     mimeType: audioBlob.type,
-                    blob: audioBlob // Keep blob for local preview if needed, URL.createObjectURL is temporary
+                    blob: audioBlob 
                 });
             };
             reader.readAsDataURL(audioBlob);
 
-            stream.getTracks().forEach(track => track.stop()); // Stop microphone tracks
-            if (audioTimerIntervalRef.current) clearInterval(audioTimerIntervalRef.current);
+            stream.getTracks().forEach(track => track.stop()); 
+            if (audioTimerIntervalRef.current !== null) {
+                window.clearInterval(audioTimerIntervalRef.current);
+                audioTimerIntervalRef.current = null;
+            }
         };
 
         mediaRecorderRef.current.start();
@@ -210,7 +274,10 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
     if (mediaRecorderRef.current && isAudioRecording) {
         mediaRecorderRef.current.stop();
         setIsAudioRecording(false);
-        if (audioTimerIntervalRef.current) clearInterval(audioTimerIntervalRef.current);
+        if (audioTimerIntervalRef.current !== null) {
+            window.clearInterval(audioTimerIntervalRef.current);
+            audioTimerIntervalRef.current = null;
+        }
     }
   };
 
@@ -349,19 +416,20 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
             ref={textareaRef} 
             value={inputValue}
             onChange={(e) => {
+                // Only allow direct typing if not actively listening for STT or recording audio
                 if(!isListening && !isAudioRecording) { 
                     setInputValue(e.target.value);
                 }
             }}
             onKeyDown={handleKeyDown}
             placeholder={
-                isListening ? "Listening for speech-to-text..." 
+                isListening ? "Listening... (say 'period', 'comma', 'question mark', etc.)" 
                 : isAudioRecording ? "Recording audio message..." 
-                : "Type, speak, or attach file..."
+                : "Type, speak (say 'period', 'comma', etc.), or attach file..."
             }
             className="flex-grow p-2 bg-transparent text-gpt-text focus:outline-none resize-none min-h-[2.5rem] sm:min-h-[2.8rem] max-h-48 overflow-y-auto" 
             rows={1}
-            readOnly={isListening || isAudioRecording} 
+            readOnly={isListening || isAudioRecording} // Make textarea readonly during STT or audio recording
             aria-label="Chat message input"
             style={{ lineHeight: '1.5rem' }} 
           />

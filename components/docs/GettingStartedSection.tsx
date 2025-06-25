@@ -10,13 +10,22 @@ Welcome to Mia's Gem Chat Studio!
 - **An API key for the Gemini API.** See the "Important: API Key Configuration" section below.
 - A microphone for voice input and audio message recording.
 - A camera for image input (optional).
-- Mia's avatar image file (\`mia_avatar.png\`) placed in the \`/assets/\` directory (or ensure persona avatarPaths point to valid URLs).
+- Ensure persona avatarPaths in \`personas.ts\` point to valid URLs.
 
 **Running the App:**
 1. **Configure your Gemini API key** (see details below).
-2. Ensure persona avatar images are correctly referenced (e.g., \`/assets/mia_avatar.png\` or valid URLs in \`personas.ts\`).
-3. Open \`index.html\` in your browser (typically served by a local web server if you are developing).
-4. Grant microphone and camera permissions when prompted if you wish to use those features.
+2. Ensure persona avatar images are correctly referenced (URLs in \`personas.ts\`).
+3. (Optional) **Customize Persona System Messages**:
+    - Persona-specific welcome messages (when a persona starts or is loaded) and persona change announcements are defined as templates in the \`messageTemplates.ts\` file.
+    - To tailor how each persona introduces itself or announces its activation, you can edit the string templates within this file.
+    - These templates support dynamic placeholders like:
+        - \`{personaName}\`: Replaced with the persona's display name (e.g., "🧠 Mia").
+        - \`{instructionStatusMessage}\`: Indicates if default or custom system instructions are in use.
+        - \`{modelName}\`: Shows the current Gemini model.
+        - \`{newPersonaName}\`: Used in change announcements for the incoming persona's name.
+    - Refer to \`messageTemplates.ts\` for the exact structure and existing templates.
+4. Open \`index.html\` in your browser (typically served by a local web server if you are developing).
+5. Grant microphone and camera permissions when prompted if you wish to use those features.
 
 ---
 

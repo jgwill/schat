@@ -12,7 +12,7 @@ interface PersonaSelectorBarProps {
 const PersonaSelectorBar: React.FC<PersonaSelectorBarProps> = React.memo(({ personas, activePersonaId, onSelectPersona, isLoading }) => {
   return (
     <div 
-      className="bg-gpt-light pt-1 pb-3 px-3 border-b border-gpt-gray sticky top-[56px] z-10 shadow-sm" // Changed from top-[52px] to top-[56px]
+      className="bg-gpt-light pt-1 pb-3 px-3 border-b border-gpt-gray sticky top-[52px] z-10 shadow-sm" // Changed from top-[56px] to top-[52px]
       role="radiogroup"
       aria-label="Choose your AI Friend"
     >

@@ -64,8 +64,8 @@
                 }
             },
             plugins: [
-                // require('@tailwindcss/typography'), // Removed: 'require' is not defined in the browser.
-                                                    // Typography plugin via CDN needs a different setup if not default.
+                // Typography plugin via CDN needs a different setup if not default.
+                // The custom typography config above provides basic styling.
             ],
         }
     </script>
@@ -79,10 +79,13 @@
     "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
     "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.0.1"
+    "@google/genai": "https://esm.sh/@google/genai@^1.0.1",
+    "react-markdown": "https://esm.sh/react-markdown@^9.0.1",
+    "remark-gfm": "https://esm.sh/remark-gfm@^4.0.0"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-gpt-dark text-gpt-text font-sans">
     <div id="root"></div>
@@ -112,5 +115,4 @@
       }
     </script>
 </body>
-</html><link rel="stylesheet" href="index.css">
-<script src="index.tsx" type="module"></script>
+</html>

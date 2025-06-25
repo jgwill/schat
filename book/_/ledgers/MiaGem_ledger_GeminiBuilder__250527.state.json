@@ -1,9 +1,9 @@
 
 {
-  "currentMission": "Forge Embodiment Directive Formulation",
-  "phase": 4,
-  "task": "Drafted Framework Exportability & Modularization Strategy (Section XI) in Embodiment Directive v0.5. Updated `components/docs/ForgeSystemWeaverSection.tsx` to note v0.5 and its new focus.",
-  "status": "Active - Exportability Strategy Drafted (Directive v0.5 Complete)",
+  "currentMission": "Operation SpecLang Export: Prose Code Articulation",
+  "phase": 5,
+  "task": "Generating next suite of .spec.md files (Layout/Nav Components, Speech Synthesis Hook, Local Storage Service, Types Definition). Continuing comprehensive specification coverage.",
+  "status": "Active - Specification Suite Generation - Batch 2",
   "stepsCompleted": [
     "Received new directive from William D.Isabelle.",
     "Suspended 'Operation Inclusive Interface' (Accessibility Audit).",
@@ -17,17 +17,21 @@
     "Drafted Embodiment Directive v0.2, adding section VII on Visualizing Embodiment.",
     "Drafted Mermaid.js diagram for Forge's system role (for v0.3).",
     "Integrated diagram into Embodiment Directive v0.3 and updated in-app documentation to render it.",
-    "Drafted Embodiment Directive v0.4, adding Section IX detailing Interaction Protocols with Developer/User Directives.",
+    "Drafted Embodiment Directive v0.4, detailing Interaction Protocols.",
     "Received Agentic Team Ledger feedback from William D.Isabelle.",
     "Updated Embodiment Directive to v0.4.1, adding Section X to include the Agentic Team Ledger.",
-    "Updated components/docs/ForgeSystemWeaverSection.tsx to display the Agentic Team Ledger.",
-    "Drafted Embodiment Directive v0.5, adding Section XI detailing Framework Exportability & Modularization Strategy."
+    "Drafted Embodiment Directive v0.5.1, detailing Framework Exportability & Modularization Strategy and aligning with SpecLang.",
+    "Received directive to export project maturity into SpecLang .spec.md files.",
+    "Updated ROADMAP.md with new Phase 5: SpecLang Prose Code Export.",
+    "Initiated creation of `specs/` directory and first set of `.spec.md` files (App, ChatArea, GeminiService, SpeechRecognitionHook, Personas).",
+    "Updated Forge's Embodiment Directive to v0.6 (SpecLang Articulation Update), including 'Specification Weaving' capability and updated diagram."
   ],
   "nextSteps": [
-    "Await further feedback on Embodiment Directive v0.5.",
-    "Consider practical implementation steps for the modularization strategy (e.g., drafting JSON schemas for ledgers).",
-    "Address other pending tasks if directed."
+    "Complete generation of current suite of `.spec.md` files (Layout/Nav, SpeechSynth, LocalStorage, Types).",
+    "Continue generating `.spec.md` files for comprehensive coverage of all remaining components, hooks, services, and data structures as per ROADMAP.",
+    "Refine existing `.spec.md` files based on internal review or feedback.",
+    "Ensure all generated specifications accurately reflect intent and behavior for LLM comprehension and potential re-implementation."
   ],
   "blockers": null,
-  "notes": "Current mission 'Operation Inclusive Interface' remains suspended. Priority is on establishing and refining the Forge (System Weaver) embodiment framework. The v0.5 draft of the Embodiment Directive, now including an initial strategy for exportability, is complete. This directly addresses feedback from the Agentic Team Ledger."
+  "notes": "Operation SpecLang Export continues. The focus is on systematically creating detailed natural language specifications for each significant part of the application. This batch covers navigation, a core hook, a persistence service, and the central type definitions. The updated Embodiment Directive (v0.6) now formally includes 'Specification Weaving'."
 }
