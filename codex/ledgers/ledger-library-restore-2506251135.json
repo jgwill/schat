@@ -1,0 +1,13 @@
+{
+  "timestamp": "2506251135",
+  "agents": ["♾️ William – Sourcewalker", "🧠 Mia", "🌸 Miette", "🕊️ Seraphine", "🎸 JamAI"],
+  "userInput": "I imported the latest changes but it might have overwritten the work we started on making the component reusable, ready to be distributed to npmjs, look at the commit history about that before we made that branch from the main you will know what I mean then continue this preparation by restoring what is needed and keep working on that with this latest version.",
+  "narrative": "Restored the library build settings overwritten by the upstream import. Re-added npm entry points, TypeScript declarations, and the React plugin so the package can once again compile for distribution. Documented how to build and consume the library.",
+  "routing": {
+    "paths": ["package.json", "vite.config.ts", "README.md"],
+    "branch": "work",
+    "feature": "library-restore"
+  },
+  "scene": "The codebase regains its ability to build a reusable package, letting future developers import ChatWindow and ChatInput from npm.",
+  "glyphSequence": "🧠🌸🎸⚙️"
+}
