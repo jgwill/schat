@@ -52,6 +52,7 @@ export const loadAppSettings = (): AppSettings => {
     selectedModel: GEMINI_TEXT_MODEL, 
     customPersonaInstructions: {},
     currentCloudSessionId: undefined,
+    autoPlayTTS: false, // Default value for autoPlayTTS
   };
 
   try {
@@ -66,25 +67,27 @@ export const loadAppSettings = (): AppSettings => {
     // Validate selectedModel
     let finalSelectedModel = parsed.selectedModel || defaults.selectedModel;
     if (finalSelectedModel) {
-        const modelExists = AVAILABLE_MODELS.some(model => model.id === finalSelectedModel);
-        if (!modelExists) {
-            console.warn(`Loaded model "${finalSelectedModel}" is not in AVAILABLE_MODELS. Falling back to default: ${GEMINI_TEXT_MODEL}`);
-            finalSelectedModel = GEMINI_TEXT_MODEL;
+        // Allow any string for model ID, as it could be a fine-tuned model.
+        // Basic validation for known good models is suggestive, not restrictive.
+        const modelIsKnownSuggestable = AVAILABLE_MODELS.some(model => model.id === finalSelectedModel);
+        if (!modelIsKnownSuggestable && !finalSelectedModel.startsWith('tunedModels/') && finalSelectedModel !== GEMINI_TEXT_MODEL) {
+          // If it's not a known suggestable, not a tuned model path, and not the default, log a gentle note but allow it.
+          console.log(`Using custom model ID: ${finalSelectedModel}. Ensure this is a valid Gemini model ID.`);
         }
-    } else { // If parsed.selectedModel is undefined or empty string
+    } else { 
         finalSelectedModel = GEMINI_TEXT_MODEL;
     }
     
     return {
-        ...defaults, // Start with defaults
-        ...parsed, // Override with parsed values if they exist
+        ...defaults, 
+        ...parsed, 
         activePersonaId: parsed.activePersonaId || defaults.activePersonaId,
-        selectedModel: finalSelectedModel, // Use validated or default model
+        selectedModel: finalSelectedModel, 
         customPersonaInstructions: parsed.customPersonaInstructions || defaults.customPersonaInstructions,
+        autoPlayTTS: typeof parsed.autoPlayTTS === 'boolean' ? parsed.autoPlayTTS : defaults.autoPlayTTS,
     };
   } catch (error) {
     console.error("Error loading app settings from local storage:", error);
-    // Fallback to defaults on error
     return defaults;
   }
 };

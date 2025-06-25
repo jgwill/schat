@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Persona, DashboardPageProps, ToastType } from '../types'; // Updated import
 import MarkdownRenderer from './MarkdownRenderer';
@@ -185,7 +187,7 @@ const DashboardPage: React.FC<DashboardPageProps> = React.memo(({
             <p className="text-gray-400 mb-1">
               Current Active Cloud Session ID: <strong className="text-sky-400">{currentCloudSessionId || 'None'}</strong>
             </p>
-            <div className="my-3 space-x-2">
+            <div className="my-3 flex flex-wrap gap-2">
                 <button
                     onClick={handleQuickSaveToCloud}
                     disabled={isLoading}

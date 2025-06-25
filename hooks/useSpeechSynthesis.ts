@@ -1,32 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
 
-// Function to clean markdown syntax from text before speech synthesis
-const cleanTextForSpeech = (text: string): string => {
-  return text
-    // Remove markdown headers (# ## ###)
-    .replace(/^#{1,6}\s+/gm, '')
-    // Remove bold/italic markers (* ** _)
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/_(.+?)_/g, '$1')
-    // Remove code blocks (``` and `)
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`(.+?)`/g, '$1')
-    // Remove links [text](url) -> text
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-    // Remove horizontal rules (---)
-    .replace(/^---+$/gm, '')
-    // Remove blockquotes (>)
-    .replace(/^>\s+/gm, '')
-    // Remove list markers (- * +)
-    .replace(/^[\s]*[-\*\+]\s+/gm, '')
-    // Remove numbered lists (1. 2.)
-    .replace(/^[\s]*\d+\.\s+/gm, '')
-    // Remove extra whitespace and newlines
-    .replace(/\n\s*\n/g, '\n')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface SpeechSynthesisHook {
   speak: (text: string) => void;
@@ -51,13 +24,12 @@ const useSpeechSynthesis = (): SpeechSynthesisHook => {
     
     const synth = window.speechSynthesis;
     const u = new SpeechSynthesisUtterance();
-    
     u.lang = 'en-US';
     u.pitch = 1;
     u.rate = 1;
     u.volume = 1;
 
-    u.onstart = () => setIsSpeaking(true);
+    u.onstart = () => setIsSpeaking(true); // Browser confirms speech has started
     u.onend = () => setIsSpeaking(false);
     u.onerror = (event) => {
       setError(`Speech synthesis error: ${event.error}`);
@@ -82,9 +54,8 @@ const useSpeechSynthesis = (): SpeechSynthesisHook => {
       synth.cancel(); // Cancel current speech before starting new one
     }
     
-    // Clean the text from markdown syntax before passing to the utterance
-    const cleanText = cleanTextForSpeech(text);
-    utterance.text = cleanText;
+    utterance.text = text;
+    setIsSpeaking(true); // Set state immediately to reflect intent to speak
     synth.speak(utterance);
   }, [utterance, browserSupportsSpeechSynthesis]);
 

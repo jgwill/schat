@@ -1,7 +1,7 @@
 {
   "name": "miagemchatstudio",
-  "private": true,
-  "version": "0.0.0",
+  "private": false,
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -15,9 +15,11 @@
     "build:lib": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@google/genai": "^1.0.1",
+    "react-dom": "^19.1.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@google/genai": "^1.0.1",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
@@ -26,5 +28,13 @@
     "@vitejs/plugin-react": "^4.5.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
   }
 }

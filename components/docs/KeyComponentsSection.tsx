@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MarkdownRenderer from '../MarkdownRenderer';
 import MermaidRenderer from '../MermaidRenderer';
@@ -7,15 +8,22 @@ This section highlights some of the key React components used in Mia's Gem Chat 
 `;
 
 const MARKDOWN_RENDERER_EXAMPLE = `
-**Example:**
+**Example using react-markdown:**
 *   Item 1 _italic_
 *   Item 2 \`inline code\`
-[A Link](https://google.com)
+[A Link to Google](https://google.com) that opens in a new tab.
+
 \`\`\`javascript
 function greet() {
-  console.log("Hello, Markdown!");
+  console.log("Hello, from react-markdown!");
 }
 \`\`\`
+
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
+
 `;
 
 const MERMAID_EXAMPLE_CHART = `
@@ -37,7 +45,7 @@ const KeyComponentsSection: React.FC = () => {
       <MarkdownRenderer markdown={KEY_COMPONENTS_CONTENT_INTRO} />
 
       <h3 className="text-xl font-medium mt-4 mb-2 text-gray-300">MarkdownRenderer</h3>
-      <p className="mb-2 text-gray-400">This component is used to render Markdown text into HTML. It supports basic syntax like bold, italics, code blocks, links, and lists, styled using Tailwind Typography.</p>
+      <p className="mb-2 text-gray-400">This component renders Markdown text into HTML using the <code className="text-sm bg-gpt-gray p-1 rounded">react-markdown</code> library with <code className="text-sm bg-gpt-gray p-1 rounded">remark-gfm</code> for GitHub Flavored Markdown support (e.g., tables, strikethrough). It's styled using Tailwind Typography for a consistent look and feel. Links automatically open in new tabs.</p>
       <div className="p-4 border border-gpt-gray rounded bg-gpt-dark">
         <MarkdownRenderer markdown={MARKDOWN_RENDERER_EXAMPLE} />
       </div>

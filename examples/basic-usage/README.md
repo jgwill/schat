@@ -9,12 +9,12 @@ This example demonstrates consuming the **miagemchatstudio** package in a fresh 
    npm pack
    ```
    
-   This produces `miagemchatstudio-0.0.0.tgz`.
+   This produces `miagemchatstudio-0.0.1.tgz`.
 
 2. Inside this `examples/basic-usage` folder run:
 
    ```bash
-   npm install ../miagemchatstudio-0.0.0.tgz
+   npm install ../miagemchatstudio-0.0.1.tgz
    npm install
    npm run dev
    ```

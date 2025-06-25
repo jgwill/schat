@@ -17,3 +17,11 @@ Added missing files after previous code generation.
 - Installed dependencies and fixed TypeScript build errors.
 - Introduced an example Vite app under `examples/basic-usage` demonstrating how to consume the library.
 - Expanded README with step-by-step instructions to run the example.
+
+## 7310822 imported latest version from jgwill/EchoThreads
+- Pulled in numerous updates across components and documentation.
+- Note indicated some library preparation work might have been overwritten.
+
+## b643e65 restore library build settings
+- Reintroduced npm package entry points and React plugin.
+- Added documentation describing library usage again.
