@@ -196,7 +196,7 @@ const ChatInput: React.FC<ChatInputProps> = React.memo(({ onSendMessage, isLoadi
         setIsAudioRecording(true);
         setAudioRecordingStartTime(Date.now());
         setAudioRecordingDuration(0);
-        audioTimerIntervalRef.current = setInterval(() => {
+        audioTimerIntervalRef.current = window.setInterval(() => {
             setAudioRecordingDuration(prev => prev + 1);
         }, 1000);
 
