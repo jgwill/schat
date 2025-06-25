@@ -1,7 +1,7 @@
 {
   "name": "miagemchatstudio",
-  "private": true,
-  "version": "0.0.0",
+  "private": false,
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -28,5 +28,13 @@
     "@vitejs/plugin-react": "^4.5.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
   }
 }

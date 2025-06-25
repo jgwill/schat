@@ -200,13 +200,13 @@ An example Vite + React app is provided under `examples/basic-usage`.
    npm pack
    ```
 
-   This creates `miagemchatstudio-0.0.0.tgz`.
+   This creates `miagemchatstudio-0.0.1.tgz`.
 
 2. Inside `examples/basic-usage`, install the tarball and start the dev server:
 
    ```bash
    cd examples/basic-usage
-   npm install ../miagemchatstudio-0.0.0.tgz
+   npm install ../miagemchatstudio-0.0.1.tgz
    npm install
    npm run dev
    ```

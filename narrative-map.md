@@ -22,6 +22,6 @@ Added missing files after previous code generation.
 - Pulled in numerous updates across components and documentation.
 - Note indicated some library preparation work might have been overwritten.
 
-## <pending> restore library build settings
+## b643e65 restore library build settings
 - Reintroduced npm package entry points and React plugin.
 - Added documentation describing library usage again.
