@@ -48,7 +48,6 @@ specs/
 __UPZIP_Flow.sh
 WS__schat.code-workspace
 vite.config.ts.upgraded
-yarn.lock
 package-lock.json
 .env
 .hch
