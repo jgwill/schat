@@ -9,6 +9,7 @@ COPY . .
 RUN npm run build
 
 FROM nginx:stable-alpine
+RUN apk add --no-cache gettext
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/default.conf.template /etc/nginx/templates/
 EXPOSE 8080
