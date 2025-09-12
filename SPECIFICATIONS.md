@@ -33,7 +33,7 @@ This document outlines the specifications for Mia's Gem Chat Studio features, ai
     *   Upon successful submission, the text input area will automatically clear, ready for the next message.
     *   To prevent empty or unintended submissions, the "Send" button should appear disabled if the input field contains no text or if the application is currently processing a previous message.
 
-### `[x] Integration with Gemini API for text-based chat (\`gemini-2.5-flash-preview-04-17\`).`
+### `[x] Integration with Gemini API for text-based chat (\`gemini-2.5-flash-lite\`).`
 *   **Goal:** Connect the user's input to the Gemini language model to generate intelligent AI responses.
 *   **Experience & Behavior:**
     *   While the integration itself is a backend process, the user experiences it through the AI's conversational replies appearing in the chat window.
@@ -308,7 +308,7 @@ This document outlines the specifications for Mia's Gem Chat Studio features, ai
 *   **Goal:** Allow users to specify and use different Gemini model IDs, including potentially fine-tuned models, for their chat interactions.
 *   **Experience & Behavior:**
     *   In the `SettingsPanel`, the previous model selection dropdown will be replaced by a text input field.
-    *   Users can enter any valid Gemini model ID (e.g., the default `gemini-2.5-flash-preview-04-17`, or a custom fine-tuned model identifier like `tunedModels/your-model-id`).
+    *   Users can enter any valid Gemini model ID (e.g., the default `gemini-2.5-flash-lite`, or a custom fine-tuned model identifier like `tunedModels/your-model-id`).
     *   A "Set Model" button will apply the entered ID.
     *   A list of known/suggested models will still be displayed for reference.
     *   Upon changing the model, the chat session will reset, and an initial message from the AI will confirm the new model and the start of a new session context.

@@ -25,7 +25,7 @@ A core aspect of this project is its adherence to the **SpecLang philosophy**, w
 -   **Custom Gemini Model Integration:** Specify custom Gemini model IDs.
 -   **Dark Theme:** Sleek, modern dark interface.
 -   **Clear Message Display:** Distinct styling for user/AI messages, timestamps, avatars. Visually distinct AI service errors.
--   **Powered by Gemini:** Defaults to `gemini-2.5-flash-preview-04-17`, customizable.
+-   **Powered by Gemini:** Defaults to `gemini-2.5-flash-lite`, customizable.
 -   **Session Management:**
     -   **Local Sessions:** Save/load chat sessions to/from browser local storage.
     -   **Simulated Cloud Sessions (Upstash Redis principles):** Save, load, list, and delete named sessions (simulation uses localStorage, with comments for real integration).
@@ -177,41 +177,6 @@ This API provides a way to interact with the application's core logic without di
 ## Technologies Used
 
 -   React 18+, TypeScript, Tailwind CSS, @google/genai, Browser Speech APIs, MediaRecorder API, Browser Camera APIs, FileReader API, Mermaid.js, react-markdown.
-
-## Using as a Component Library
-
-The components, hooks, and services can be compiled into a reusable library.
-
-1. Run `npm run build:lib` to generate the `dist/` folder.
-2. Install this package in another project and import what you need:
-
-```ts
-import { ChatWindow, ChatInput } from 'miagemchatstudio';
-```
-
-## Example Project
-
-An example Vite + React app is provided under `examples/basic-usage`.
-
-1. Build and pack the library:
-
-   ```bash
-   npm run build:lib
-   npm pack
-   ```
-
-   This creates `miagemchatstudio-0.0.1.tgz`.
-
-2. Inside `examples/basic-usage`, install the tarball and start the dev server:
-
-   ```bash
-   cd examples/basic-usage
-   npm install ../miagemchatstudio-0.0.1.tgz
-   npm install
-   npm run dev
-   ```
-
-The example will open a page showing `ChatWindow` and `ChatInput` working together.
 
 ## License
 

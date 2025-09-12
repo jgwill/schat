@@ -6,9 +6,9 @@ export const USER_AVATAR_SVG = `
 `; // A generic user icon for User
 
 
-export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash-preview-04-17';
+export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash-lite';
 export const AVAILABLE_MODELS = [
-    { id: 'gemini-2.5-flash-preview-04-17', name: 'Gemini 2.5 Flash Preview' },
+    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
     // { id: 'gemini-native-audio-thinking-placeholder', name: 'Gemini Native Audio Thinking (Placeholder)' }, // Removed as it's not a valid/available model for generateContent
 ];
 

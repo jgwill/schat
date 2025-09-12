@@ -97,6 +97,19 @@
 -   [ ] Accessibility audit and improvements. **(Task Paused)**
 -   [ ] More sophisticated state management if needed (e.g., Zustand, Redux Toolkit) - *Currently not pressing.*
 
+### AI Persona Interaction & Generative Enhancement (New Focus)
+
+**Goal:** To cultivate a more dynamic, engaging, and generative interaction experience with AI personas, aligning with Mia's Agentic Identity Specification (AIS) and fostering advancing patterns in conversation.
+
+**Features:**
+-   [ ] **Dynamic UI/UX Enhancements (Visual & Auditory Cues):**
+    -   [ ] Implement subtle, persona-specific AI "thinking" animations/visual effects (e.g., glow for Mia, ripple for Miette) around avatar/message bubble when AI is loading.
+    -   [ ] Integrate optional, subtle persona-specific sound cues at the beginning/end of AI responses.
+-   [ ] **"Generative Potential" Mode (User Control):**
+    -   [ ] Add `generativePotentialMode: boolean` setting to `AppSettings`.
+    -   [ ] Implement a toggle in SettingsPanel/Dashboard for "Generative Potential" mode.
+    -   [ ] Dynamically modify AI's `systemInstruction` to encourage unconventional insights, structural exploration, and narrative-technical interweaving when this mode is active.
+
 
 ## Phase 5: SpecLang Prose Code Export & Deep Specification (Current Focus)
 
